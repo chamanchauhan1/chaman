@@ -236,6 +236,5 @@ export class MemStorage implements IStorage {
   }
 }
 
-import { SupabaseStorage } from "./supabase-storage";
-
-export const storage = new SupabaseStorage();
+// Using MemStorage for in-memory data storage
+export const storage = new MemStorage();
