@@ -17,6 +17,9 @@ import Animals from "@/pages/animals";
 import Treatments from "@/pages/treatments";
 import Reports from "@/pages/reports";
 import UploadPage from "@/pages/upload";
+import AdminDashboard from "@/pages/admin-dashboard";
+import AdminUsers from "@/pages/admin-users";
+import AdminCompliance from "@/pages/admin-compliance";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const { isAuthenticated } = useAuth();
@@ -78,6 +81,9 @@ function AppRouter() {
                 <Route path="/treatments" component={() => <ProtectedRoute component={Treatments} />} />
                 <Route path="/reports" component={() => <ProtectedRoute component={Reports} />} />
                 <Route path="/upload" component={() => <ProtectedRoute component={UploadPage} />} />
+                <Route path="/admin" component={() => <ProtectedRoute component={AdminDashboard} />} />
+                <Route path="/admin/users" component={() => <ProtectedRoute component={AdminUsers} />} />
+                <Route path="/admin/compliance" component={() => <ProtectedRoute component={AdminCompliance} />} />
                 <Route path="/">
                   <Redirect to="/dashboard" />
                 </Route>

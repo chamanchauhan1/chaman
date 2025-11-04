@@ -1,4 +1,4 @@
-import { Home, Users, Activity, FileText, Upload, LogOut, BarChart3 } from "lucide-react";
+import { Home, Users, Activity, FileText, Upload, LogOut, BarChart3, Shield, UserCog, AlertTriangle } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -37,7 +37,19 @@ export function AppSidebar() {
     { title: "Compliance Reports", url: "/reports", icon: FileText },
   ];
 
-  const menuItems = user?.role === "farmer" ? farmerMenuItems : inspectorMenuItems;
+  const adminMenuItems = [
+    { title: "Admin Dashboard", url: "/admin", icon: Shield },
+    { title: "User Management", url: "/admin/users", icon: UserCog },
+    { title: "Compliance Monitor", url: "/admin/compliance", icon: AlertTriangle },
+    { title: "All Farms", url: "/farms", icon: BarChart3 },
+    { title: "All Animals", url: "/animals", icon: Users },
+    { title: "Treatment Records", url: "/treatments", icon: Activity },
+  ];
+
+  const menuItems = 
+    user?.role === "admin" ? adminMenuItems :
+    user?.role === "farmer" ? farmerMenuItems : 
+    inspectorMenuItems;
 
   return (
     <Sidebar>
@@ -56,7 +68,7 @@ export function AppSidebar() {
             <p className="text-sm font-medium">{user.fullName}</p>
             <p className="text-xs text-muted-foreground">{user.email}</p>
             <Badge className="mt-2" variant="outline" data-testid={`badge-role-${user.role}`}>
-              {user.role === "farmer" ? "Farmer" : "Inspector"}
+              {user.role === "farmer" ? "Farmer" : user.role === "inspector" ? "Inspector" : "Admin"}
             </Badge>
           </div>
         )}
