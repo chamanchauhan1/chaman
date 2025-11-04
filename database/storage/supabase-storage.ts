@@ -71,6 +71,34 @@ export class SupabaseStorage implements IStorage {
     } as User;
   }
 
+  async getAllUsers(): Promise<User[]> {
+    const { data, error } = await supabase
+      .from("users")
+      .select("*")
+      .order("username");
+
+    if (error) throw new Error(error.message);
+    
+    return (data || []).map(user => ({
+      id: user.id,
+      username: user.username,
+      password: user.password,
+      fullName: user.full_name,
+      role: user.role,
+      email: user.email,
+      farmId: user.farm_id,
+    }));
+  }
+
+  async updateUserRole(userId: string, role: string): Promise<void> {
+    const { error } = await supabase
+      .from("users")
+      .update({ role })
+      .eq("id", userId);
+
+    if (error) throw new Error(error.message);
+  }
+
   // Farm methods
   async getAllFarms(): Promise<Farm[]> {
     const { data, error } = await supabase

@@ -266,6 +266,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin routes - require admin role
+  app.get("/api/admin/users", authMiddleware, async (req, res) => {
+    try {
+      const user = (req as AuthRequest).user;
+      if (user?.role !== "admin") {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const users = await storage.getAllUsers();
+      const usersWithoutPasswords = users.map(({ password, ...user }) => user);
+      res.json(usersWithoutPasswords);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Failed to fetch users" });
+    }
+  });
+
+  app.patch("/api/admin/users/:userId/role", authMiddleware, async (req, res) => {
+    try {
+      const user = (req as AuthRequest).user;
+      if (user?.role !== "admin") {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { userId } = req.params;
+      const { role } = req.body;
+
+      if (!["farmer", "inspector", "admin"].includes(role)) {
+        return res.status(400).json({ message: "Invalid role" });
+      }
+
+      await storage.updateUserRole(userId, role);
+      res.json({ message: "User role updated successfully" });
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to update user role" });
+    }
+  });
+
+  app.get("/api/admin/system-stats", authMiddleware, async (req, res) => {
+    try {
+      const user = (req as AuthRequest).user;
+      if (user?.role !== "admin") {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const [users, farms, animals, treatments] = await Promise.all([
+        storage.getAllUsers(),
+        storage.getAllFarms(),
+        storage.getAllAnimals(),
+        storage.getAllTreatmentRecords(),
+      ]);
+
+      const violations = treatments.filter((t) => t.complianceStatus === "violation");
+      const warnings = treatments.filter((t) => t.complianceStatus === "warning");
+
+      res.json({
+        totalUsers: users.length,
+        totalFarms: farms.length,
+        totalAnimals: animals.length,
+        totalTreatments: treatments.length,
+        activeViolations: violations.length,
+        activeWarnings: warnings.length,
+        usersByRole: {
+          farmers: users.filter((u) => u.role === "farmer").length,
+          inspectors: users.filter((u) => u.role === "inspector").length,
+          admins: users.filter((u) => u.role === "admin").length,
+        },
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Failed to fetch system stats" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

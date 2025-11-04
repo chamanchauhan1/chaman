@@ -75,7 +75,7 @@ export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
   farmId: true,
 }).extend({
-  role: z.enum(["farmer", "inspector"]),
+  role: z.enum(["farmer", "inspector", "admin"]),
 });
 
 export const loginSchema = z.object({
