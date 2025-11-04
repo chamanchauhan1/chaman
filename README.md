@@ -99,6 +99,8 @@ The application uses in-memory storage by default. To use a PostgreSQL database:
 
 ### Running the Application
 
+#### Development Mode
+
 Start the development server:
 ```bash
 npm run dev
@@ -107,7 +109,97 @@ npm run dev
 This will start:
 - Express backend server
 - Vite development server for the frontend
-- The application will be accessible at the configured port
+- The application will be accessible at `http://localhost:5000`
+
+#### Production Build
+
+Build the application for production:
+```bash
+npm run build
+```
+
+Run the production build:
+```bash
+npm start
+```
+
+### Running in VS Code
+
+#### Option 1: Using VS Code Terminal
+
+1. **Open the project in VS Code**:
+   ```bash
+   code .
+   ```
+
+2. **Open the integrated terminal** (Terminal → New Terminal or `` Ctrl+` ``)
+
+3. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+
+4. **Start the development server**:
+   ```bash
+   npm run dev
+   ```
+
+5. **Open the application**:
+   - The server will start on `http://localhost:5000`
+   - Open this URL in your browser
+
+#### Option 2: Using VS Code Launch Configuration
+
+Create a `.vscode/launch.json` file with the following configuration:
+
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch Program",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/node_modules/tsx/dist/cli.mjs",
+      "args": ["server/index.ts"],
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    }
+  ]
+}
+```
+
+Then press `F5` or go to Run → Start Debugging.
+
+#### Recommended VS Code Extensions
+
+Install these extensions for the best development experience:
+
+- **ESLint** (dbaeumer.vscode-eslint) - JavaScript/TypeScript linting
+- **Prettier** (esbenp.prettier-vscode) - Code formatting
+- **TypeScript and JavaScript Language Features** (built-in) - IntelliSense
+- **Tailwind CSS IntelliSense** (bradlc.vscode-tailwindcss) - Tailwind CSS autocompletion
+- **Path Intellisense** (christian-kohler.path-intellisense) - File path autocomplete
+- **PostCSS Language Support** (csstools.postcss) - PostCSS syntax support
+
+#### VS Code Settings
+
+Create a `.vscode/settings.json` file for consistent formatting:
+
+```json
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "typescript.preferences.importModuleSpecifier": "non-relative"
+}
+```
 
 ### User Roles
 
