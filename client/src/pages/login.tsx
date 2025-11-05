@@ -21,7 +21,7 @@ export default function Login() {
   const form = useForm<LoginCredentials>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      username: "",
+      email: "",
       password: "",
     },
   });
@@ -29,23 +29,12 @@ export default function Login() {
   async function onSubmit(values: LoginCredentials) {
     setIsLoading(true);
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Login failed");
-      }
-
-      const data = await response.json();
-      login(data.user, data.token);
+      // Use the login function from auth context which now uses Supabase
+      await login(values.email, values.password);
       
       toast({
         title: "Welcome back!",
-        description: `Logged in as ${data.user.fullName}`,
+        description: "Successfully logged in",
       });
       
       setLocation("/dashboard");
@@ -85,14 +74,15 @@ export default function Login() {
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                   control={form.control}
-                  name="username"
+                  name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Username</FormLabel>
+                      <FormLabel>Email</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Enter your username"
-                          data-testid="input-username"
+                          type="email"
+                          placeholder="Enter your email"
+                          data-testid="input-email"
                           {...field}
                         />
                       </FormControl>

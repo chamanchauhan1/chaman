@@ -10,8 +10,18 @@ import {
   type FarmReport,
   type InsertFarmReport,
 } from "../schema";
-import { supabase } from "../supabase-client";
+import { createClient } from "@supabase/supabase-js";
 import { type IStorage } from "./index";
+
+// Create server-side Supabase client with environment variables
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseUrl || !supabaseServiceRoleKey) {
+  throw new Error("Missing Supabase environment variables (SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY)");
+}
+
+const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
 export class SupabaseStorage implements IStorage {
   // User methods
@@ -52,7 +62,11 @@ export class SupabaseStorage implements IStorage {
     const { data, error } = await supabase
       .from("users")
       .insert({
-        ...insertUser,
+        username: insertUser.username,
+        password: insertUser.password,
+        email: insertUser.email,
+        full_name: insertUser.fullName,
+        role: insertUser.role,
         farm_id: insertUser.farmId ?? null,
       })
       .select()
@@ -87,6 +101,8 @@ export class SupabaseStorage implements IStorage {
       role: user.role,
       email: user.email,
       farmId: user.farm_id,
+      createdAt: user.created_at ? new Date(user.created_at) : new Date(),
+      updatedAt: user.updated_at ? new Date(user.updated_at) : new Date(),
     }));
   }
 

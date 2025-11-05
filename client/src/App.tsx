@@ -1,5 +1,5 @@
 import { Switch, Route, Redirect } from "wouter";
-import { queryClient } from "./lib/queryClient";
+import { supabaseQueryClient as queryClient } from "./lib/supabase-query-client";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,7 +11,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import NotFound from "@/pages/not-found";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
-import Dashboard from "@/pages/dashboard";
+import Dashboard from "@/pages/dashboard-supabase";
 import Farms from "@/pages/farms";
 import Animals from "@/pages/animals";
 import Treatments from "@/pages/treatments";
@@ -20,6 +20,8 @@ import UploadPage from "@/pages/upload";
 import AdminDashboard from "@/pages/admin-dashboard";
 import AdminUsers from "@/pages/admin-users";
 import AdminCompliance from "@/pages/admin-compliance";
+import { ClearAuthData } from "@/components/clear-auth-data";
+import { useEffect } from "react";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const { isAuthenticated } = useAuth();
@@ -84,6 +86,7 @@ function AppRouter() {
                 <Route path="/admin" component={() => <ProtectedRoute component={AdminDashboard} />} />
                 <Route path="/admin/users" component={() => <ProtectedRoute component={AdminUsers} />} />
                 <Route path="/admin/compliance" component={() => <ProtectedRoute component={AdminCompliance} />} />
+                <Route path="/settings" component={() => <ProtectedRoute component={ClearAuthData} />} />
                 <Route path="/">
                   <Redirect to="/dashboard" />
                 </Route>

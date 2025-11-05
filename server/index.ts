@@ -1,6 +1,10 @@
+import "./env";
+
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import path from "path";
+import { supabaseMiddleware } from "./middleware/supabase";
 
 const app = express();
 
@@ -16,6 +20,10 @@ app.use(express.json({
   }
 }));
 app.use(express.urlencoded({ extended: false }));
+
+const authenticatedRoutes = express.Router();
+authenticatedRoutes.use(supabaseMiddleware);
+app.use(authenticatedRoutes);
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -46,7 +54,7 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  const server = await registerRoutes(app);
+  const server = await registerRoutes(app, authenticatedRoutes);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
@@ -61,10 +69,14 @@ app.use((req, res, next) => {
     await setupVite(app, server);
   } else {
     serveStatic(app);
+
+    app.get("*", (req, res) => {
+      res.sendFile(path.resolve(__dirname, "../client/index.html"));
+    });
   }
 
   // Windows-friendly listen
-  const port = parseInt(process.env.PORT || "5000", 10);
+  const port = parseInt(process.env.PORT || "5001", 10);
   server.listen(port, () => {
     log(`Server running at http://localhost:${port}`);
   });

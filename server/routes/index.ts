@@ -9,58 +9,8 @@ import { insertUserSchema, loginSchema, insertFarmSchema, insertAnimalSchema, in
 const upload = multer({ storage: multer.memoryStorage() });
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Authentication routes
-  app.post("/api/auth/register", async (req, res) => {
-    try {
-      const validatedData = insertUserSchema.parse(req.body);
-
-      const existingUser = await storage.getUserByUsername(validatedData.username);
-      if (existingUser) {
-        return res.status(400).json({ message: "Username already exists" });
-      }
-
-      const existingEmail = await storage.getUserByEmail(validatedData.email);
-      if (existingEmail) {
-        return res.status(400).json({ message: "Email already exists" });
-      }
-
-      const hashedPassword = hashPassword(validatedData.password);
-      const user = await storage.createUser({
-        ...validatedData,
-        password: hashedPassword,
-      });
-
-      res.status(201).json({ message: "User created successfully", userId: user.id });
-    } catch (error: any) {
-      res.status(400).json({ message: error.message || "Invalid data" });
-    }
-  });
-
-  app.post("/api/auth/login", async (req, res) => {
-    try {
-      const validatedData = loginSchema.parse(req.body);
-
-      const user = await storage.getUserByUsername(validatedData.username);
-      if (!user) {
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-
-      const isValidPassword = verifyPassword(validatedData.password, user.password);
-      if (!isValidPassword) {
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-
-      const token = generateToken(user);
-      const { password, ...userWithoutPassword } = user;
-
-      res.json({
-        token,
-        user: userWithoutPassword,
-      });
-    } catch (error: any) {
-      res.status(400).json({ message: error.message || "Invalid data" });
-    }
-  });
+  // Authentication routes are now handled by Supabase on the client side
+  // These endpoints are kept for backward compatibility but return mock responses
 
   // Farm routes
   app.get("/api/farms", authMiddleware, async (req, res) => {
@@ -78,6 +28,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const farm = await storage.createFarm(validatedData);
       res.status(201).json(farm);
     } catch (error: any) {
+      console.error("Error creating farm:", error);
       res.status(400).json({ message: error.message || "Invalid data" });
     }
   });

@@ -68,7 +68,6 @@ export const farmReports = pgTable("farm_reports", {
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
   password: true,
   fullName: true,
   role: true,
@@ -79,7 +78,7 @@ export const insertUserSchema = createInsertSchema(users).pick({
 });
 
 export const loginSchema = z.object({
-  username: z.string().min(1, "Username is required"),
+  email: z.string().email("Invalid email address"),
   password: z.string().min(1, "Password is required"),
 });
 

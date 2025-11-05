@@ -11,6 +11,8 @@ export const users = pgTable("users", {
   role: text("role").notNull(), // 'farmer' or 'inspector'
   email: text("email").notNull().unique(),
   farmId: varchar("farm_id"),
+  createdAt: timestamp("created_at").default(sql`now()`).notNull(),
+  updatedAt: timestamp("updated_at").default(sql`now()`).notNull(),
 });
 
 export const farms = pgTable("farms", {

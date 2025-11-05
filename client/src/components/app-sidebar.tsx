@@ -1,4 +1,4 @@
-import { Home, Users, Activity, FileText, Upload, LogOut, BarChart3, Shield, UserCog, AlertTriangle } from "lucide-react";
+import { Home, Users, Activity, FileText, Upload, LogOut, BarChart3, Shield, UserCog, AlertTriangle, Settings } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -93,15 +93,27 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="p-4">
-        <Button
-          variant="outline"
-          className="w-full justify-start gap-2"
-          onClick={logout}
-          data-testid="button-logout"
-        >
-          <LogOut className="h-4 w-4" />
-          Logout
-        </Button>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={location === "/settings"}>
+              <Link href="/settings" data-testid="link-settings">
+                <Settings className="h-4 w-4" />
+                <span>Settings</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <Button
+              variant="outline"
+              className="w-full justify-start gap-2"
+              onClick={logout}
+              data-testid="button-logout"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </Button>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
   );

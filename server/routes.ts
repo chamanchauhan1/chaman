@@ -5,10 +5,11 @@ import multer from "multer";
 import { storage } from "../database/storage";
 import { generateToken, hashPassword, verifyPassword, authMiddleware, type AuthRequest } from "./auth";
 import { insertUserSchema, loginSchema, insertFarmSchema, insertAnimalSchema, insertTreatmentRecordSchema } from "../database/schema";
+import { supabaseMiddleware } from "./middleware/supabase";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
-export async function registerRoutes(app: Express): Promise<Server> {
+export async function registerRoutes(app: Express, authenticatedRoutes: express.Router): Promise<Server> {
   // Authentication routes
   app.post("/api/auth/register", async (req, res) => {
     try {
@@ -36,7 +37,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/auth/login", async (req, res) => {
+  app.post("/api/auth/login", supabaseMiddleware, async (req, res) => {
     try {
       const validatedData = loginSchema.parse(req.body);
 
@@ -63,7 +64,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Farm routes
-  app.get("/api/farms", authMiddleware, async (req, res) => {
+  authenticatedRoutes.get("/api/farms", authMiddleware, async (req, res) => {
     try {
       const farms = await storage.getAllFarms();
       res.json(farms);
@@ -72,7 +73,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/farms", authMiddleware, async (req, res) => {
+  authenticatedRoutes.post("/api/farms", authMiddleware, async (req, res) => {
     try {
       const validatedData = insertFarmSchema.parse(req.body);
       const farm = await storage.createFarm(validatedData);
@@ -83,7 +84,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Animal routes
-  app.get("/api/animals", authMiddleware, async (req, res) => {
+  authenticatedRoutes.get("/api/animals", authMiddleware, async (req, res) => {
     try {
       const animals = await storage.getAllAnimals();
       res.json(animals);
@@ -92,7 +93,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/animals", authMiddleware, async (req, res) => {
+  authenticatedRoutes.post("/api/animals", authMiddleware, async (req, res) => {
     try {
       const validatedData = insertAnimalSchema.parse(req.body);
       const animal = await storage.createAnimal(validatedData);
@@ -103,7 +104,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Treatment Record routes
-  app.get("/api/treatments", authMiddleware, async (req, res) => {
+  authenticatedRoutes.get("/api/treatments", authMiddleware, async (req, res) => {
     try {
       const treatments = await storage.getAllTreatmentRecords();
       res.json(treatments);
@@ -112,7 +113,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/treatments", authMiddleware, async (req, res) => {
+  authenticatedRoutes.post("/api/treatments", authMiddleware, async (req, res) => {
     try {
       const validatedData = insertTreatmentRecordSchema.parse(req.body);
       const treatment = await storage.createTreatmentRecord(validatedData);
@@ -123,7 +124,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Farm Report routes
-  app.get("/api/reports", authMiddleware, async (req, res) => {
+  authenticatedRoutes.get("/api/reports", authMiddleware, async (req, res) => {
     try {
       const reports = await storage.getAllFarmReports();
       res.json(reports);
@@ -132,7 +133,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/upload", authMiddleware, upload.single("file"), async (req, res) => {
+  authenticatedRoutes.post("/api/upload", authMiddleware, upload.single("file"), async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
@@ -167,7 +168,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Dashboard statistics routes
-  app.get("/api/dashboard/stats", authMiddleware, async (req, res) => {
+  authenticatedRoutes.get("/api/dashboard/stats", authMiddleware, async (req, res) => {
     try {
       const animals = await storage.getAllAnimals();
       const treatments = await storage.getAllTreatmentRecords();
@@ -199,7 +200,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/dashboard/trends", authMiddleware, async (req, res) => {
+  authenticatedRoutes.get("/api/dashboard/trends", authMiddleware, async (req, res) => {
     try {
       const treatments = await storage.getAllTreatmentRecords();
       
@@ -233,7 +234,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/dashboard/compliance", authMiddleware, async (req, res) => {
+  authenticatedRoutes.get("/api/dashboard/compliance", authMiddleware, async (req, res) => {
     try {
       const treatments = await storage.getAllTreatmentRecords();
       
@@ -267,7 +268,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin routes - require admin role
-  app.get("/api/admin/users", authMiddleware, async (req, res) => {
+  authenticatedRoutes.get("/api/admin/users", authMiddleware, async (req, res) => {
     try {
       const user = (req as AuthRequest).user;
       if (user?.role !== "admin") {
@@ -282,7 +283,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/admin/users/:userId/role", authMiddleware, async (req, res) => {
+  authenticatedRoutes.patch("/api/admin/users/:userId/role", authMiddleware, async (req, res) => {
     try {
       const user = (req as AuthRequest).user;
       if (user?.role !== "admin") {
@@ -303,7 +304,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/system-stats", authMiddleware, async (req, res) => {
+  authenticatedRoutes.get("/api/admin/system-stats", authMiddleware, async (req, res) => {
     try {
       const user = (req as AuthRequest).user;
       if (user?.role !== "admin") {
@@ -337,6 +338,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: error.message || "Failed to fetch system stats" });
     }
   });
+
+  app.use(authenticatedRoutes);
 
   const httpServer = createServer(app);
   return httpServer;
